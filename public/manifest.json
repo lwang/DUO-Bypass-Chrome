@@ -1,0 +1,18 @@
+{
+	"manifest_version": 3,
+	"name": "Duo Bypass",
+	"short_name": "Duo Bypass",
+	"description": "Duo MFA Bypass / OTP Generator",
+	"version": "1.0.0",
+	"permissions": [
+		"scripting",
+		"tabs",
+		"storage"
+	],
+	"host_permissions": [
+		"https://*/*"
+	],
+	"action": {
+		"default_popup": "index.html"
+	}
+}
