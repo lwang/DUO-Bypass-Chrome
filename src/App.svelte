@@ -6,7 +6,7 @@
       return;
 
     const hotp = new jsOTP.hotp();
-
+	
     // Check to see if any stored devices matches devices in the dropdown
     devices.forEach((data, _idx) => {
       let found = false;
@@ -23,7 +23,8 @@
       data.counter += 1;
     });
 
-    chrome.storage.sync.set({'devices': devices}, {}); // Save counter
+    let temp = chrome.storage.sync.set({'devices': devices}); // Save counter
+	//chrome.storage.sync.set({'devices': [{counter: , device: '', secret: ''}]});
   }
 
   let device_array = [];
@@ -73,22 +74,28 @@
     const url = `https://${host}/push/v2/activation/${code}`;
 
     fetch(url, {method: "POST"})
-    .then(response => response.json())
-    .then(json => {
-      device_array.push({
-        device : nick,
-        secret : json['response']['hotp_secret'],
-        counter : 0,
-      });
-      chrome.storage.sync.set({'devices': device_array}, {});
+    .then(async (response) => {
+		console.log(response)
+		if (!response.ok) {
+			throw new Error("Not 2xx response", {cause: response});
+		} else {
+		  const json = await response.json();
+		  console.log(json)
+		  device_array.push({
+			device : nick,
+			secret : json['response']['hotp_secret'],
+			counter : 0,
+		  });
+		  chrome.storage.sync.set({'devices': device_array}, function() { console.log('devices is set to ' + JSON.stringify(device_array)); });
 
-      add_new = false;
-    })
+		  add_new = false;
+		}
+    }).catch(e => {console.log(e); alert('Link is expired. Please remove and re-add the device to your account to generate a fresh link.');})
   }
 
   function remove(idx) {
     device_array = device_array.filter((e, i) => i !== idx);
-    chrome.storage.sync.set({'devices': device_array}, {});
+    chrome.storage.sync.set({'devices': device_array}, function() { console.log('devices is set to ' + device_array); });
   }
 </script>
 
